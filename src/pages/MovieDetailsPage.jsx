@@ -1,42 +1,65 @@
-import { useEffect, useState } from "react";
-import { useParams, Link, Outlet, useNavigate } from "react-router-dom";
-import axios from "axios";
+import { useParams, useLocation, useNavigate, Outlet } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import axios from 'axios';
 
-const API_URL = "https://api.themoviedb.org/3/movie";
-const API_KEY = "53322783e949c8f8bd2d757ea1bc6689";
+const API_URL = 'https://api.themoviedb.org/3/movie/';
+const API_KEY = '53322783e949c8f8bd2d757ea1bc6689';
 
 export const MovieDetailsPage = () => {
   const { movieId } = useParams();
-  const [movie, setMovie] = useState(null);
+  const location = useLocation();
   const navigate = useNavigate();
+  const backLocationRef = useRef(location.state?.from || '/movies');
+  const [movieDetails, setMovieDetails] = useState(null);
 
   useEffect(() => {
-    axios
-      .get(`${API_URL}/${movieId}?api_key=${API_KEY}`)
-      .then((response) => setMovie(response.data))
-      .catch(console.error);
+    const fetchMovieDetails = async () => {
+      try {
+        const response = await axios.get(`${API_URL}${movieId}`, {
+          headers: {
+            Authorization: `Bearer ${API_KEY}`,
+          },
+        });
+        setMovieDetails(response.data);
+      } catch (error) {
+        console.error('Error fetching movie details:', error);
+      }
+    };
+
+    fetchMovieDetails();
   }, [movieId]);
 
-  if (!movie) return <p>Loading...</p>;
+  const handleGoBack = () => {
+    navigate(backLocationRef.current);
+  };
+
+  if (!movieDetails) return <p>Loading...</p>;
 
   return (
     <div>
-      <button onClick={() => navigate(-1)}>Go back</button>
-      <h2>{movie.title}</h2>
+      <button onClick={handleGoBack}>Go back</button>
+      <h1>{movieDetails.title}</h1>
+      <p>{movieDetails.overview}</p>
       <img
-        src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-        alt={movie.title}
+        src={`https://image.tmdb.org/t/p/w500${movieDetails.poster_path}`}
+        alt={movieDetails.title}
       />
-      <p>{movie.overview}</p>
-      <ul>
-        <li>
-          <Link to="cast">Cast</Link>
-        </li>
-        <li>
-          <Link to="reviews">Reviews</Link>
-        </li>
-      </ul>
-      <Outlet />
+      <div>
+        <h2>Additional Information</h2>
+        <ul>
+          <li>
+            <NavLink to="cast" state={{ from: backLocationRef.current }}>
+              Cast
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="reviews" state={{ from: backLocationRef.current }}>
+              Reviews
+            </NavLink>
+          </li>
+        </ul>
+        <Outlet />
+      </div>
     </div>
   );
 };
