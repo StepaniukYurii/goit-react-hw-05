@@ -20,7 +20,6 @@ export const MovieDetailsPage = () => {
 
   useEffect(() => {
     const fetchMovieDetails = async () => {
-      console.log("Using API Key in URL");
       try {
         const response = await axios.get(
           `${API_URL}${movieId}?api_key=${API_KEY}`
