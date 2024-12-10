@@ -1,28 +1,33 @@
-import { useParams, useLocation, useNavigate, Outlet, NavLink } from 'react-router-dom';
-import { useEffect, useRef, useState } from 'react';
-import axios from 'axios';
+import {
+  useParams,
+  useLocation,
+  useNavigate,
+  Outlet,
+  NavLink,
+} from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import axios from "axios";
 
-const API_URL = 'https://api.themoviedb.org/3/movie/';
-const API_KEY = '53322783e949c8f8bd2d757ea1bc6689';
+const API_URL = "https://api.themoviedb.org/3/movie/";
+const API_KEY = "53322783e949c8f8bd2d757ea1bc6689";
 
 export const MovieDetailsPage = () => {
   const { movieId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const backLocationRef = useRef(location.state?.from || '/movies');
+  const backLocationRef = useRef(location.state?.from || "/movies");
   const [movieDetails, setMovieDetails] = useState(null);
 
   useEffect(() => {
     const fetchMovieDetails = async () => {
+      console.log("Using API Key in URL");
       try {
-        const response = await axios.get(`${API_URL}${movieId}`, {
-          headers: {
-            Authorization: `Bearer ${API_KEY}`,
-          },
-        });
+        const response = await axios.get(
+          `${API_URL}${movieId}?api_key=${API_KEY}`
+        );
         setMovieDetails(response.data);
       } catch (error) {
-        console.error('Error fetching movie details:', error);
+        console.error("Error fetching movie details:", error);
       }
     };
 
